@@ -15,7 +15,7 @@ var last_direction = Vector3.FORWARD
 var rotation_speed = 6
 
 @onready var camera_pivot: Node3D = $CameraPivot
-@onready var body: Node3D = $Body
+@onready var body: Node3D = $Armature
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -41,7 +41,7 @@ func _physics_process(delta: float) -> void:
 	
 	rotation.y = lerpf(rotation.y, rotation.y - horizontal * delta, 10 * delta)
 	camera_pivot.rotation.x = lerpf(camera_pivot.rotation.x, camera_pivot.rotation.x - vertical * delta, 10 * delta)
-	camera_pivot.rotation.x = clamp(camera_pivot.rotation.x, deg_to_rad(-40), deg_to_rad(30))
+	camera_pivot.rotation.x = clamp(camera_pivot.rotation.x, deg_to_rad(-40), deg_to_rad(65))
 	
 	horizontal = 0
 	vertical = 0
