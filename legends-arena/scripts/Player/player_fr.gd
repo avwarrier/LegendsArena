@@ -1,7 +1,7 @@
 extends CharacterBody3D
 
 
-const SPEED = 5.0
+var speed = 5.0
 const JUMP_VELOCITY = 4.5
 
 var sens_horizontal = 0.09
@@ -14,8 +14,12 @@ var camera_input_direction := Vector2.ZERO
 var last_direction = Vector3.FORWARD
 var rotation_speed = 8
 
+# ACTIONS
+var sprinting
+
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var body: Node3D = $Armature
+@onready var animation_tree: AnimationTree = $AnimationTree
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
@@ -46,6 +50,8 @@ func _physics_process(delta: float) -> void:
 	#horizontal = 0
 	#vertical = 0
 	
+	
+	
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
@@ -64,14 +70,27 @@ func _physics_process(delta: float) -> void:
 
 	body.global_rotation.y = lerp_angle(body.global_rotation.y, target_angle, rotation_speed * delta)
 	
+	if Input.is_action_pressed("sprint") and input_dir != Vector2.ZERO:
+		sprinting = true
+		speed = 7
+
+	if Input.is_action_just_released("sprint") or input_dir == Vector2.ZERO:
+		sprinting = false
+		speed = 5
+	
 	if direction:
-		velocity.x = direction.x * SPEED
-		velocity.z = direction.z * SPEED
+		velocity.x = direction.x * speed
+		velocity.z = direction.z * speed
 		
 		#body.look_at(position + direction)
 		#body.rotation.x = deg_to_rad(90)
 	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED * delta * 6)
-		velocity.z = move_toward(velocity.z, 0, SPEED * delta * 6)
+		velocity.x = move_toward(velocity.x, 0, speed * delta * 6)
+		velocity.z = move_toward(velocity.z, 0, speed * delta * 6)
+
+	animation_tree.set("parameters/conditions/idle", input_dir == Vector2.ZERO and is_on_floor())
+	animation_tree.set("parameters/conditions/walkForward", !sprinting and input_dir != Vector2.ZERO and is_on_floor())
+	animation_tree.set("parameters/conditions/jump", !is_on_floor())
+	animation_tree.set("parameters/conditions/run", sprinting)
 
 	move_and_slide()
